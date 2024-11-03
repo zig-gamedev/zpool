@@ -1,4 +1,4 @@
-# zpool
+# [zpool](https://github.com/zig-gamedev/zpool)
 
 Generic pool & handle implementation for Zig. Based on [Andre Weissflog's "Handles Are The Better Pointers"](https://floooh.github.io/2018/06/17/handles-vs-pointers.html).
 
