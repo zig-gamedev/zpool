@@ -1,5 +1,6 @@
 .{
-    .name = "zpool",
+    .name = .zpool,
+    .fingerprint = 0xfb9579e9d9bd6e6c,
     .version = "0.11.0-dev",
     .paths = .{
         "build.zig",
