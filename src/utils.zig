@@ -63,12 +63,12 @@ pub fn StructOfSlices(comptime Struct: type) type {
             .pointer = .{
                 .child = element_type,
                 .alignment = @alignOf(element_type),
-                .size = .Slice,
+                .size = .slice,
                 .is_const = false,
                 .is_volatile = false,
                 .address_space = .generic,
                 .is_allowzero = false,
-                .sentinel = null,
+                .sentinel_ptr = null,
             },
         };
 
@@ -78,7 +78,7 @@ pub fn StructOfSlices(comptime Struct: type) type {
         const slice_field = std.builtin.Type.StructField{
             .name = struct_field.name,
             .type = FieldType,
-            .default_value = null,
+            .default_value_ptr = null,
             .is_comptime = false,
             .alignment = @alignOf(FieldType),
         };
