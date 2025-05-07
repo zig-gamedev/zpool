@@ -532,7 +532,10 @@ pub fn Pool(
 
         fn updateSlices(self: *Self) void {
             var slice = self._storage.slice();
-            self._free_queue.storage = slice.items(.@"Pool._free_queue");
+
+            const free_queue_storage = slice.items(.@"Pool._free_queue");
+            self._free_queue.resize(free_queue_storage);
+
             self._curr_cycle = slice.items(.@"Pool._curr_cycle");
             inline for (column_fields, 0..) |column_field, i| {
                 const F = column_field.type;
@@ -659,7 +662,8 @@ pub fn Pool(
 
         fn didGetNewHandleNoResize(self: *Self, handle: *AddressableHandle) bool {
             if (self._storage.len < max_capacity and
-                self._storage.len < self._storage.capacity)
+                self._storage.len < self._storage.capacity and
+                self._free_queue.canResize())
             {
                 const new_index = self._storage.addOneAssumeCapacity();
                 updateSlices(self);
@@ -1425,6 +1429,27 @@ test "Pool.setColumns() calls ColumnType.deinit()" {
         .b = DeinitCounter.init(&deinit_count),
     });
     try expectEqual(@as(u32, 6), deinit_count);
+}
+
+test "Adds and removes triggering resize" {
+    const TestPool = Pool(16, 16, void, struct {});
+
+    var pool = TestPool.init(std.testing.allocator);
+    defer pool.deinit();
+
+    var handles: std.ArrayListUnmanaged(TestPool.Handle) = .empty;
+    defer handles.deinit(std.testing.allocator);
+
+    for (0..16) |ix| {
+        for (0..5 * ix) |_| {
+            (try handles.addOne(std.testing.allocator)).* = try pool.add(.{});
+        }
+
+        for (0..3 * ix) |_| {
+            const handle = handles.orderedRemove(0);
+            try pool.remove(handle);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------

@@ -52,6 +52,32 @@ pub fn EmbeddedRingQueue(comptime TElement: type) type {
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+        /// Returns true if the length of `storage` can be increased via `resizeNoCopy`.
+        pub fn canResize(self: *Self) bool {
+            if (self.len() == 0) return true;
+            const tail_index = self.tail % self.storage.len;
+            const head_index = self.head % self.storage.len;
+            return tail_index > head_index;
+        }
+
+        /// Replaces `storage` with `new_storage`. The caller guarantees that `new_storage`
+        /// contains the same data as the previous storage (ie. it's the same region of
+        /// memory but with a larger `len`, or the caller has copied the previous memory).
+        pub fn resize(self: *Self, new_storage: []Element) void {
+            // The backing storage can't be increased if the range of entries wraps past the end of the
+            // backing buffer, as we'd be adding invalid entries into the middle of the queue.
+            assert(new_storage.len >= self.storage.len and self.canResize());
+            const prev_len = self.len();
+            if (prev_len > 0) {
+                self.head = self.head % self.storage.len;
+                self.tail = self.head + prev_len;
+            }
+
+            self.storage = new_storage;
+        }
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
         pub fn enqueue(self: *Self, value: Element) Error!void {
             if (self.enqueueIfNotFull(value)) {
                 return;
