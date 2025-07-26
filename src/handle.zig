@@ -142,14 +142,7 @@ pub fn Handle(
             }
         };
 
-        pub fn format(
-            self: Self,
-            comptime fmt: []const u8,
-            options: std.fmt.FormatOptions,
-            writer: anytype,
-        ) !void {
-            _ = fmt;
-            _ = options;
+        pub fn format(self: Self, writer: *std.io.Writer) std.io.Writer.Error!void {
             const n = @typeName(Resource);
             const a = self.addressable();
             return writer.print("{s}[{}#{}]", .{ n, a.index, a.cycle });
@@ -273,6 +266,6 @@ test "Handle.format()" {
     const h = H.init(0, 1);
 
     var buffer = [_]u8{0} ** 128;
-    const s = try bufPrint(buffer[0..], "{}", .{h});
+    const s = try bufPrint(buffer[0..], "{f}", .{h});
     try expectEqualStrings("handle.test.Handle.format().Foo[0#1]", s);
 }
