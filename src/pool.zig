@@ -603,11 +603,11 @@ pub fn Pool(
             handle: AddressableHandle,
         ) HandleError!void {
             if (isFreeCycle(handle.cycle))
-                return Error.HandleIsUnacquired;
+                return error.HandleIsUnacquired;
             if (handle.index >= self._curr_cycle.len)
-                return Error.HandleIsOutOfBounds;
+                return error.HandleIsOutOfBounds;
             if (handle.cycle != self._curr_cycle[handle.index])
-                return Error.HandleIsReleased;
+                return error.HandleIsReleased;
         }
 
         fn acquireAddressableHandle(self: *Self) !AddressableHandle {
