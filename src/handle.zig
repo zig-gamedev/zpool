@@ -265,7 +265,7 @@ test "Handle.format()" {
     const H = Handle(12, 4, Foo);
     const h = H.init(0, 1);
 
-    var buffer = [_]u8{0} ** 128;
+    var buffer: [128]u8 = @splat(0);
     const s = try bufPrint(buffer[0..], "{f}", .{h});
     try expectEqualStrings("handle.test.Handle.format().Foo[0#1]", s);
 }
