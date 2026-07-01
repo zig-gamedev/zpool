@@ -576,10 +576,8 @@ pub fn Pool(
 
             self._curr_cycle = slice.items(.@"Pool._curr_cycle");
             inline for (column_fields, 0..) |column_field, i| {
-                const F = column_field.type;
-                const p = slice.ptrs[private_fields.len + i];
-                const f = @as([*]F, @ptrCast(@alignCast(p)));
-                @field(self.columns, column_field.name) = f[0..slice.len];
+                const field = @as(Storage.Field, @enumFromInt(private_fields.len + i));
+                @field(self.columns, column_field.name) = slice.items(field);
             }
         }
 
@@ -815,6 +813,13 @@ test "Pool with two columns" {
     try expectEqual(@as(u64, 456), try pool.getColumn(handle, .b));
     try pool.setColumn(handle, .b, 123);
     try expectEqual(@as(u64, 123), try pool.getColumn(handle, .b));
+}
+
+test "Pool.init() works for columns with alignment > 2" {
+    const StructWithAlign4 = struct { a: u32 };
+    const TestPool = Pool(8, 8, void, StructWithAlign4);
+    var pool = TestPool.init(std.testing.allocator);
+    defer pool.deinit();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
