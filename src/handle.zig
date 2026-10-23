@@ -258,14 +258,14 @@ test "Handle sort order" {
 ////////////////////////////////////////////////////////////////////////////////
 
 test "Handle.format()" {
-    const bufPrint = std.fmt.bufPrint;
     const expectEqualStrings = std.testing.expectEqualStrings;
 
     const Foo = struct {};
     const H = Handle(12, 4, Foo);
     const h = H.init(0, 1);
 
-    var buffer = [_]u8{0} ** 128;
-    const s = try bufPrint(buffer[0..], "{f}", .{h});
-    try expectEqualStrings("handle.test.Handle.format().Foo[0#1]", s);
+    const str = try std.fmt.allocPrint(std.testing.allocator, "{f}", .{h});
+    defer std.testing.allocator.free(str);
+
+    try expectEqualStrings("handle.test.Handle.format().Foo[0#1]", str);
 }
